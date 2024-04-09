@@ -28,6 +28,8 @@ from typing import Annotated, Optional
 
 import vtk
 
+import numpy as np
+
 import slicer
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
@@ -233,23 +235,6 @@ class DTI_ALPSWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         self.setParameterNode(self.logic.getParameterNode())
 
-        # Select default input nodes if nothing is selected yet to save a few clicks for the user
-        # if not self._parameterNode.inputVolume:
-        #     firstVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLDiffusionTensorVolumeNode")
-        #     if firstVolumeNode:
-        #         self._parameterNode.inputVolume = firstVolumeNode
-
-        # # TODO: Adicionar tip para que as labels tenham inicio com Proj e Assoc
-        # if not self._parameterNode.inputProjectionLabel:
-        #     firstLabelVolumeNode = slicer.mrmlScene.getFirstNodeByName("Proj*")
-        #     if firstLabelVolumeNode:
-        #         self._parameterNode.inputProjectionLabel = firstLabelVolumeNode
-
-        # if not self._parameterNode.inputAssociationLabel:
-        #     secondLabelVolumeNode = slicer.mrmlScene.getFirstNodeByName("Assoc*")
-        #     if firstLabelVolumeNode:
-        #         self._parameterNode.inputProjectionLabel = firstLabelVolumeNode
-
     def setParameterNode(self, inputParameterNode: Optional[DTI_ALPSParameterNode]) -> None:
         """
         Set and observe parameter node.
@@ -285,20 +270,12 @@ class DTI_ALPSWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
 
             # Compute DTI-ALPS index
-            self.logic.process(self.ui.inputDTISelector.currentNode(), self.ui.outputSelector.currentNode(),
-                               self.ui.imageThresholdSliderWidget.value, self.ui.invertOutputCheckBox.checked)
-
-            # Compute inverted output (if needed)
-            if self.ui.invertedOutputSelector.currentNode():
-                # If additional output volume is selected then result with inverted threshold is written there
-                self.logic.process(self.ui.inputDTISelector.currentNode(), self.ui.invertedOutputSelector.currentNode(),
-                                   self.ui.imageThresholdSliderWidget.value, not self.ui.invertOutputCheckBox.checked, showResult=False)
-
+            self.logic.process(self.ui.inputDTISelector.currentNode(), self.ui.inputProjLabelSelector.currentNode(),
+                               self.ui.inputAssocLabelSelector.currentNode(), self.ui.MNISpaceCheckBox.checked)
 
 #
 # DTI_ALPSLogic
 #
-
 class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
     """This class should implement all the actual
     computation done by your module.  The interface
@@ -319,71 +296,97 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
         return DTI_ALPSParameterNode(super().getParameterNode())
 
     def process(self,
-                inputVolume: vtkMRMLDiffusionTensorVolumeNode,
+                inputDTIVolume: vtkMRMLDiffusionTensorVolumeNode,
                 inputProjLabel: vtkMRMLLabelMapVolumeNode,
-                inputAssocLabel: vtkMRMLLabelMapVolumeNode) -> None:
+                inputAssocLabel: vtkMRMLLabelMapVolumeNode,
+                MNISpaceCheck: bool = False) -> None:
         """
         Run the processing algorithm.
         Can be used without GUI widget.
-        :param inputVolume: volume to be thresholded
-        :param outputVolume: thresholding result
-        :param imageThreshold: values above/below this threshold will be set to 0
-        :param invert: if True then values above the threshold will be set to 0, otherwise values below are set to 0
-        :param showResult: show output volume in slice viewers
+        :param inputDTIVolume: DTI volume to be the source of DTI-ALPS index calculation
+        :param inputProjLabel: The Projection ROI area
+        :param inputAssocLabel: The Association ROI area
+        :param MNISpaceCheck: Informs if the input volume is in MNI space (2 mm) to use standard Proj/Assoc labels
         """
 
-        if not inputVolume or not outputVolume:
-            raise ValueError("Input or output volume is invalid")
+        if not inputDTIVolume or not inputProjLabel or not inputAssocLabel:
+            raise ValueError("Input DTI, Projection and/or Association labels are not valid")
 
         import time
         startTime = time.time()
         logging.info('Processing started')
 
-        # Compute the thresholded output volume using the "Threshold Scalar Volume" CLI module
-        cliParams = {
-            'InputVolume': inputVolume.GetID(),
-            'OutputVolume': outputVolume.GetID(),
-            'ThresholdValue': imageThreshold,
-            'ThresholdType': 'Above' if invert else 'Below'
-        }
-        cliNode = slicer.cli.run(slicer.modules.thresholdscalarvolume, None, cliParams, wait_for_completion=True, update_display=showResult)
-        # We don't need the CLI module node anymore, remove it to not clutter the scene with it
-        slicer.mrmlScene.RemoveNode(cliNode)
+        if MNISpaceCheck:
+            logging.info("MNI space processing started.")
+            # TODO: Implementar a logica para MNI com labels padrão (criar labels e guardar no modulo)
+            
+            # Finish the process logic
+            stopTime = time.time()
+            logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
+            return
+        
+        logging.info("Native space processing started")
+        dti_alps = calculateDTIALPSNativeSpace(inputDTIVolume, inputProjLabel, inputAssocLabel)                
+
+        logging.info(f'DTI-ALPS index: {dti_alps:.6f}')
+        # TODO: Adicionar na UI uma tabela ou caixa de saida abaixo do Apply Button
 
         stopTime = time.time()
         logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
-        # TODO: Adicionar a logica do calculo de DTI-ALPS
 
-        # Step 1: Check the input data is a DTI volume and the necessaries labels
+def calculateDTIALPSNativeSpace(inputDTIVolume, inputProjLabel, inputAssocLabel):
+    dti_vol = slicer.util.arrayFromVolume(inputDTIVolume)
+    proj_vol = slicer.util.arrayFromVolume(inputProjLabel)
+    assoc_vol = slicer.util.arrayFromVolume(inputAssocLabel)
 
-        # Step 2: Collect all the voxels from DTI tensor for label Projection
+    proj_points = np.where( proj_vol != 0 )
+    assoc_points = np.where( assoc_vol != 0)
 
-        """
-        Get the values of all voxels for a label value
-        If you have a background image called ‘Volume’ and a mask called ‘Volume-label’ created with the Segment Editor you could do something like this:
+    dti_proj_vals = dti_vol[proj_points]
+    dti_assoc_vals = dti_vol[assoc_points]
 
-        import numpy
-        volume = array("Volume")
-        label = array("Volume-label")
-        points  = numpy.where( label == 1 )  # or use another label number depending on what you segmented
-        values  = volume[points] # this will be a list of the label values
-        values.mean() # should match the mean value of LabelStatistics calculation as a double-check
-        numpy.savetxt("values.txt", values)
-        """
+    # DTI-ALPS calculation: mean(Dxx-proj, Dxx-assoc)/mean(Dyy-proj, Dzz-assoc)
+    # Recall that the diffusion tensor ir represented as: 
+    # D = [ Dxx Dxy Dxz
+    #       Dyx Dyy Dyz
+    #       Dzx Dzy Dzz ]
+    dxx_proj = {
+        "diff_value": 0,
+        "points": 0
+    }
+    dyy_proj = {
+        "diff_value": 0,
+        "points": 0
+    }
+    dxx_assoc = {
+        "diff_value": 0,
+        "points": 0
+    }
+    dzz_assoc = {
+        "diff_value": 0,
+        "points": 0
+    }
+    for voxel in dti_proj_vals:
+        dxx_proj["diff_value"] += voxel[0][0]
+        dyy_proj["diff_value"] += voxel[1][1]
+        dxx_proj["points"] += 1
+        dyy_proj["points"] += 1
 
-        # Step 3: Collect all the voxels from DTI tensor for label Association
+    for voxel in dti_assoc_vals:
+        dxx_assoc["diff_value"] += voxel[0][0]
+        dzz_assoc["diff_value"] += voxel[2][2]
+        dxx_assoc["points"] += 1
+        dzz_assoc["points"] += 1
 
-        # Step 4: Calculate the DTI-ALPS index
-
-        # Step 5: Show the results in the Slicer Table
-        # TODO: Adicionar na UI uma tabela ou caixa de saida abaixo do Apply Button
-
+    # DTI-ALPS index calculations
+    mean_numerator = ((dxx_proj["diff_value"]/dxx_proj["points"])+(dxx_assoc["diff_value"]/dxx_assoc["points"]))/2.0
+    mean_denominator = ((dyy_proj["diff_value"]/dyy_proj["points"])+(dzz_assoc["diff_value"]/dzz_assoc["points"]))/2.0
+    return mean_numerator/mean_denominator
 
 #
 # DTI_ALPSTest
 #
-
 class DTI_ALPSTest(ScriptedLoadableModuleTest):
     """
     This is the test case for your scripted module.
