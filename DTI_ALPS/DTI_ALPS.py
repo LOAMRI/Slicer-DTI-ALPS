@@ -163,7 +163,7 @@ class DTI_ALPSWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Load widget from .ui file (created by Qt Designer).
         # Additional widgets can be instantiated manually and added to self.layout.
-        uiWidget = slicer.util.loadUI(self.resourcePath('UI/DTI_ALPS.ui')) # TODO: Verificar como a UI
+        uiWidget = slicer.util.loadUI(self.resourcePath('UI/DTI_ALPS.ui'))
         self.layout.addWidget(uiWidget)
         self.ui = slicer.util.childWidgetVariables(uiWidget)
 
@@ -254,14 +254,7 @@ class DTI_ALPSWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def _checkCanApply(self, caller=None, event=None) -> None:
         # TODO: Mudar logica quando tiver o checkbox que a imagem está no espaço MNI padrão
-        # TODO: Entender a logica de habilitar o Apply button...
         self.ui.applyButton.enabled = True
-        # if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.inputProjectionLabel and self._parameterNode.inputAssociationLabel:
-        #     self.ui.applyButton.toolTip = "Compute the DTI-ALPS Index"
-        #     self.ui.applyButton.enabled = True
-        # else:
-        #     self.ui.applyButton.toolTip = "Select input DTI volume and the respectives Projection and Association labels"
-        #     self.ui.applyButton.enabled = False
 
     def onApplyButton(self) -> None:
         """
@@ -272,6 +265,7 @@ class DTI_ALPSWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # Compute DTI-ALPS index
             self.logic.process(self.ui.inputDTISelector.currentNode(), self.ui.inputProjLabelSelector.currentNode(),
                                self.ui.inputAssocLabelSelector.currentNode(), self.ui.MNISpaceCheckBox.checked)
+            self.ui.dti_alps_output.text = str(self.logic.dti_alps)
 
 #
 # DTI_ALPSLogic
@@ -286,6 +280,8 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
     https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
     """
 
+    dti_alps = 0.0
+
     def __init__(self) -> None:
         """
         Called when the logic class is instantiated. Can be used for initializing member variables.
@@ -294,6 +290,56 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
 
     def getParameterNode(self):
         return DTI_ALPSParameterNode(super().getParameterNode())
+
+    def calculateDTIALPSNativeSpace(self, inputDTIVolume, inputProjLabel, inputAssocLabel):
+        dti_vol = slicer.util.arrayFromVolume(inputDTIVolume)
+        proj_vol = slicer.util.arrayFromVolume(inputProjLabel)
+        assoc_vol = slicer.util.arrayFromVolume(inputAssocLabel)
+
+        proj_points = np.where( proj_vol != 0 )
+        assoc_points = np.where( assoc_vol != 0)
+
+        dti_proj_vals = dti_vol[proj_points]
+        dti_assoc_vals = dti_vol[assoc_points]
+
+        # DTI-ALPS calculation: mean(Dxx-proj, Dxx-assoc)/mean(Dyy-proj, Dzz-assoc)
+        # Recall that the diffusion tensor ir represented as: 
+        # D = [ Dxx Dxy Dxz
+        #       Dyx Dyy Dyz
+        #       Dzx Dzy Dzz ]
+        dxx_proj = {
+            "diff_value": 0,
+            "points": 0
+        }
+        dyy_proj = {
+            "diff_value": 0,
+            "points": 0
+        }
+        dxx_assoc = {
+            "diff_value": 0,
+            "points": 0
+        }
+        dzz_assoc = {
+            "diff_value": 0,
+            "points": 0
+        }
+        for voxel in dti_proj_vals:
+            dxx_proj["diff_value"] += voxel[0][0]
+            dyy_proj["diff_value"] += voxel[1][1]
+            dxx_proj["points"] += 1
+            dyy_proj["points"] += 1
+
+        for voxel in dti_assoc_vals:
+            dxx_assoc["diff_value"] += voxel[0][0]
+            dzz_assoc["diff_value"] += voxel[2][2]
+            dxx_assoc["points"] += 1
+            dzz_assoc["points"] += 1
+
+        # DTI-ALPS index calculations
+        mean_numerator = ((dxx_proj["diff_value"]/dxx_proj["points"])+(dxx_assoc["diff_value"]/dxx_assoc["points"]))/2.0
+        mean_denominator = ((dyy_proj["diff_value"]/dyy_proj["points"])+(dzz_assoc["diff_value"]/dzz_assoc["points"]))/2.0
+        
+        return mean_numerator/mean_denominator
 
     def process(self,
                 inputDTIVolume: vtkMRMLDiffusionTensorVolumeNode,
@@ -326,63 +372,18 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
             return
         
         logging.info("Native space processing started")
-        dti_alps = calculateDTIALPSNativeSpace(inputDTIVolume, inputProjLabel, inputAssocLabel)                
+        self.dti_alps = self.calculateDTIALPSNativeSpace(inputDTIVolume, inputProjLabel, inputAssocLabel)                
 
-        logging.info(f'DTI-ALPS index: {dti_alps:.6f}')
+        logging.info(f'DTI-ALPS index: {self.dti_alps:.6f}')
+        print("DTI-ALPS index: ", self.dti_alps)
+        
         # TODO: Adicionar na UI uma tabela ou caixa de saida abaixo do Apply Button
 
         stopTime = time.time()
         logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
+        return True
 
-def calculateDTIALPSNativeSpace(inputDTIVolume, inputProjLabel, inputAssocLabel):
-    dti_vol = slicer.util.arrayFromVolume(inputDTIVolume)
-    proj_vol = slicer.util.arrayFromVolume(inputProjLabel)
-    assoc_vol = slicer.util.arrayFromVolume(inputAssocLabel)
-
-    proj_points = np.where( proj_vol != 0 )
-    assoc_points = np.where( assoc_vol != 0)
-
-    dti_proj_vals = dti_vol[proj_points]
-    dti_assoc_vals = dti_vol[assoc_points]
-
-    # DTI-ALPS calculation: mean(Dxx-proj, Dxx-assoc)/mean(Dyy-proj, Dzz-assoc)
-    # Recall that the diffusion tensor ir represented as: 
-    # D = [ Dxx Dxy Dxz
-    #       Dyx Dyy Dyz
-    #       Dzx Dzy Dzz ]
-    dxx_proj = {
-        "diff_value": 0,
-        "points": 0
-    }
-    dyy_proj = {
-        "diff_value": 0,
-        "points": 0
-    }
-    dxx_assoc = {
-        "diff_value": 0,
-        "points": 0
-    }
-    dzz_assoc = {
-        "diff_value": 0,
-        "points": 0
-    }
-    for voxel in dti_proj_vals:
-        dxx_proj["diff_value"] += voxel[0][0]
-        dyy_proj["diff_value"] += voxel[1][1]
-        dxx_proj["points"] += 1
-        dyy_proj["points"] += 1
-
-    for voxel in dti_assoc_vals:
-        dxx_assoc["diff_value"] += voxel[0][0]
-        dzz_assoc["diff_value"] += voxel[2][2]
-        dxx_assoc["points"] += 1
-        dzz_assoc["points"] += 1
-
-    # DTI-ALPS index calculations
-    mean_numerator = ((dxx_proj["diff_value"]/dxx_proj["points"])+(dxx_assoc["diff_value"]/dxx_assoc["points"]))/2.0
-    mean_denominator = ((dyy_proj["diff_value"]/dyy_proj["points"])+(dzz_assoc["diff_value"]/dzz_assoc["points"]))/2.0
-    return mean_numerator/mean_denominator
 
 #
 # DTI_ALPSTest
