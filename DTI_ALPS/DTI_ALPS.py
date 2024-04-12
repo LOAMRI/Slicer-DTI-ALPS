@@ -291,7 +291,26 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
     def getParameterNode(self):
         return DTI_ALPSParameterNode(super().getParameterNode())
 
-    def calculateDTIALPSNativeSpace(self, inputDTIVolume, inputProjLabel, inputAssocLabel):
+    def checkLabelNode(self, nodeName):
+        try:
+            slicer.util.getNode(nodeName) 
+        except slicer.util.MRMLNodeNotFoundException as error:
+            return False
+        
+        return True
+
+    def checkMNISpaceInput(self, inputDTIVolume, referenceMNI):
+        in_array = slicer.util.arrayFromVolume(inputDTIVolume)
+        ref_array = slicer.util.arrayFromVolume(referenceMNI)
+
+        # Comparing the image size (numpy shape) to unsure the same image space
+        # DTI has a 3x3 matrix at the final part, thus we are have to compare only the 3 part of the image shape
+        if in_array.shape[:3]==ref_array.shape:
+            return True
+        else:
+            return False
+
+    def calculateDTIALPS(self, inputDTIVolume, inputProjLabel, inputAssocLabel):
         dti_vol = slicer.util.arrayFromVolume(inputDTIVolume)
         proj_vol = slicer.util.arrayFromVolume(inputProjLabel)
         assoc_vol = slicer.util.arrayFromVolume(inputAssocLabel)
@@ -355,8 +374,9 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
         :param MNISpaceCheck: Informs if the input volume is in MNI space (2 mm) to use standard Proj/Assoc labels
         """
 
-        if not inputDTIVolume or not inputProjLabel or not inputAssocLabel:
-            raise ValueError("Input DTI, Projection and/or Association labels are not valid")
+        if not MNISpaceCheck:
+            if not inputDTIVolume or not inputProjLabel or not inputAssocLabel:
+                raise ValueError("Input DTI, Projection and/or Association labels are not valid")
 
         import time
         startTime = time.time()
@@ -364,20 +384,42 @@ class DTI_ALPSLogic(ScriptedLoadableModuleLogic):
 
         if MNISpaceCheck:
             logging.info("MNI space processing started.")
-            # TODO: Implementar a logica para MNI com labels padrão (criar labels e guardar no modulo)
+            module_path = os.path.dirname(slicer.modules.dti_alps.path)
+
+            proj_mni_label, assoc_mni_label = "", ""
+            if not self.checkLabelNode("Projection-label-2mm-MNI"):
+                proj_mni_label = slicer.util.loadNodeFromFile(module_path+os.path.sep+"Resources"+os.path.sep+"MNI"+os.path.sep+"Projection-label-2mm-MNI.nii.gz")
+            else:
+                proj_mni_label = slicer.util.getNode("Projection-label-2mm-MNI")
+
+            if not self.checkLabelNode("Association-label-2mm-MNI"):
+                assoc_mni_label = slicer.util.loadNodeFromFile(module_path+os.path.sep+"Resources"+os.path.sep+"MNI"+os.path.sep+"Association-label-2mm-MNI.nii.gz")
+            else:
+                assoc_mni_label = slicer.util.getNode("Association-label-2mm-MNI")
+
+            logging.info("--> Checking if the input image shape is in MNI coordinates...")
+            # Choosing one of labels to represent the MNI space (both are already in MNI space)
+            if not self.checkMNISpaceInput(inputDTIVolume, proj_mni_label):
+                logging.error("Input DTI image is not in MNI space. Please resample the input DTI image to MNI before calling this option.")
+                raise ValueError("Input DTI image is not in MNI space. Please resample the input DTI image to MNI before calling this option.")
             
+            logging.info("Calculating DTI-ALPS in MNI space...")
+            self.dti_alps = self.calculateDTIALPS(inputDTIVolume, proj_mni_label, assoc_mni_label)
+            logging.info(f'DTI-ALPS index: {self.dti_alps:.6f}')
+            print("DTI-ALPS index: ", self.dti_alps)
+
             # Finish the process logic
             stopTime = time.time()
             logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
-            return
+
+            return True
         
-        logging.info("Native space processing started")
-        self.dti_alps = self.calculateDTIALPSNativeSpace(inputDTIVolume, inputProjLabel, inputAssocLabel)                
+        logging.info("Calculating DTI-ALPS in native space...")
+        self.dti_alps = self.calculateDTIALPS(inputDTIVolume, inputProjLabel, inputAssocLabel) 
+        logging.info("Calculating DTI-ALPS in native space...done")               
 
         logging.info(f'DTI-ALPS index: {self.dti_alps:.6f}')
         print("DTI-ALPS index: ", self.dti_alps)
-        
-        # TODO: Adicionar na UI uma tabela ou caixa de saida abaixo do Apply Button
 
         stopTime = time.time()
         logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')

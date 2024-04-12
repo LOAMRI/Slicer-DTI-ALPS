@@ -6,9 +6,11 @@ set(MODULE_PYTHON_SCRIPTS
   ${MODULE_NAME}.py
   )
 
+file(GLOB DTIALPS_MNI RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Resources/MNI/*.nii.gz")
 set(MODULE_PYTHON_RESOURCES
   Resources/Icons/${MODULE_NAME}.png
   Resources/UI/${MODULE_NAME}.ui
+  ${DTIALPS_MNI}
   )
 
 #-----------------------------------------------------------------------------
