@@ -16,7 +16,7 @@ parser.add_argument("inputProjLabel", type=str, nargs='?',
 parser.add_argument("inputAssocLabel", type=str, nargs='?',
                     help="Input image label that defines de Association ROI in the DTI image space")
 parser.add_argument("--MNISpace", action='store_true',
-                    help="Informs whether the input DTI image is already in the MNI space (2 mm resolution). If yes, the input Proj/Assoc paths are changed for the standar MNI labels instead.")
+                    help="Informs whether the input DTI image is already in the MNI space (2 mm resolution). If yes, the input Proj/Assoc paths are changed for the standard MNI labels instead.")
 parser.add_argument("--verbose", action='store_true',
                     help="Show more details thoughout the processing.")
 
