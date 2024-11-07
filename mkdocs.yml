@@ -1,0 +1,25 @@
+site_name: Slicer-DTI-ALPS
+repo_url: https://github.com/LOAMRI/Slicer-DTI-ALPS
+repo_name: LOAMRI/Slicer-DTI-ALPS
+edit_uri: tree/main/docs
+
+theme:
+  name: readthedocs
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+
+nav:
+  - 'index.md'
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [Slicer-DTI-ALPS]
