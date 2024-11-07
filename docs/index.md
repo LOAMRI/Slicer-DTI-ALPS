@@ -14,9 +14,11 @@ The full documentation of the usage, implementation and updates in the `DTI-ALPS
 The `Slicer DTI-ALPS` extension is a simple way to collect the `DTI-ALPS` index using a GUI interface. The images below represents some examples:
 
 ![DTI-ALPS example](assets/DTI-ALPS-NMO-patients.png){ width="600" .center}
+
 DTI-ALPS index application in evaluating Neuromyelitis optica (NMO) patients
 
 ![GUI example](assets/DTI-ALPS-sc-2.png){ width="600" .center}
+
 DTI-ALPS index GUI that simplify the image parameters and methods calculation
 
 ## Modules
