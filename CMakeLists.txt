@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16.3...3.27 FATAL_ERROR)
 
-project(DTI ALPS Index)
+project(Slicer-DTI-ALPS)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
