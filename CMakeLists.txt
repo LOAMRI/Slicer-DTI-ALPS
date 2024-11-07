@@ -4,16 +4,14 @@ project(Slicer-DTI-ALPS)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/DTI_ALPS")
+set(EXTENSION_HOMEPAGE "https://slicer-dti-alps.readthedocs.io/en/latest/")
 set(EXTENSION_CATEGORY "Diffusion")
 set(EXTENSION_CONTRIBUTORS "Antonio Senra Filho (State University of Campinas), André M. Paschoal (State University of Campinas)")
-set(EXTENSION_DESCRIPTION "Module that calculates the diffusion tensor image analysis along the perivascular space (DTI-ALPS) index")
+set(EXTENSION_DESCRIPTION "Slicer extension to provide a module that calculates the diffusion tensor image analysis along the perivascular space (DTI-ALPS) index")
 set(EXTENSION_ICONURL "https://raw.githubusercontent.com/LOAMRI/Slicer-DTI-ALPS/main/DTI_ALPS.png")
 set(EXTENSION_SCREENSHOTURLS
-  "https://www.slicer.org/w/img_auth.php/f/f5/DTI-ALPS-sc-1.png"
-  "https://www.slicer.org/w/img_auth.php/9/92/DTI-ALPS-sc-2.png"
-  "https://www.slicer.org/w/img_auth.php/0/0b/DTI-ALPS-sc-3-proj-label.png"
-  "https://www.slicer.org/w/img_auth.php/2/2f/DTI-ALPS-sc-4-assoc-label.png"
+  "https://raw.githubusercontent.com/LOAMRI/Slicer-DTI-ALPS/refs/heads/main/docs/assets/DTI-ALPS-NMO-patients.png"
+  "https://raw.githubusercontent.com/LOAMRI/Slicer-DTI-ALPS/refs/heads/main/docs/assets/DTI-ALPS-sc-2.png"
 )
 set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
 

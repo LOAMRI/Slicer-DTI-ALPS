@@ -7,7 +7,7 @@ import numpy as np
 # Instantiate the parser
 parser = argparse.ArgumentParser(description="Python script to facilitate calling DTI-ALPS module from command line. \n"+ 
                                  "This script calls the Slicer module Python code and all the funcionalities are described in the wiki page: "+
-                                 "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/DTI_ALPS")
+                                 "https://slicer-dti-alps.readthedocs.io/en/latest/")
 
 parser.add_argument("inputDTI", type=str,
                     help="Input DTI image file path")

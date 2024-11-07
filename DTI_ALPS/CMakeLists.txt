@@ -10,6 +10,7 @@ file(GLOB DTIALPS_MNI RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Resources/MNI/*.ni
 set(MODULE_PYTHON_RESOURCES
   Resources/Icons/${MODULE_NAME}.png
   Resources/UI/${MODULE_NAME}.ui
+  Resources/runDTIALPS.py
   ${DTIALPS_MNI}
   )
 
