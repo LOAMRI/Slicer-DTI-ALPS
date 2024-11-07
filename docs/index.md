@@ -7,30 +7,31 @@ Welcome to the Slicer Diffusion Tensor Image Analysis Along the Perivascular Spa
 This 3D Slicer extension was designed to assist users in processing Diffusion Tensor Imaging (DTI) for the `DTI-ALPS` index calculation. 
 
 
-The full documentation of the usage, implementation and updates in the `DTI-ALPS` index is given in this repository and posted online using a [web-based host](). 
-
+The full documentation of the usage, implementation and updates in the `DTI-ALPS` index is given in this repository and posted online using a [web-based host](https://slicer-dti-alps.readthedocs.io/en/latest/). 
 
 ## Output examples
 
 The `Slicer DTI-ALPS` extension is a simple way to collect the `DTI-ALPS` index using a GUI interface. The images below represents some examples:
 
-![FA map](assets/FA_diff_example.png){ width="300" .center}
+![DTI-ALPS example](assets/DTI-ALPS-NMO-patients.png){ width="300" .center}
+DTI-ALPS index application in evaluating Neuromyelitis optica (NMO) patients
 
+![GUI example](assets/DTI-ALPS-sc-2.png){ width="300" .center}
+DTI-ALPS index GUI that simplify the image parameters and methods calculation
 
 ## Modules
 
-### Diffusion Complexity map
+### DTI-ALPS
 
-This module is able to reconstruct the `Diffusion Complexity`  map from a standard Diffusion-Weighted MRI imaging acquisition.
+This module is able to calculate the `DTI-ALPS` index from a standard Diffusion-Tensor (DTI) MRI image. In this case, it is needed to use the tensorial image that was already reconstructed by other toolkit. For instance, the 3D Slicer `DMRI Diffusion` extension can assist you to collect the DTI image for this step.
 
 
 ## Cite this tool
 
-We hope that the `Diffusion Complexity` can be helpful for your applications. If possible, recall to cite at least one of the following publications:
+We hope that the `DTI-ALPS` can be helpful for your applications. If possible, recall to cite at least one of the following publications:
 
-* da S. Senra Filho, A., Murta Junior, L. & Monteiro Paschoal, A. Assessing biological self-organization patterns using statistical complexity characteristics: a tool for diffusion tensor imaging analysis. Magn Reson Mater Phy (2024). [DOI link](http://dx.doi.org/10.1007/s10334-024-01185-4)
-
+* Senra Filho, A. C. da S.; Paschoal, A. M. "DTI-ALPS index as complementary information for Neuromyelitis Optica patients: a preliminary evaluation". ISMR & ISMRT Annual Meeting (2025)
 
 ## License
 
-This project is under MIT license and following details are given at the [LICENSE](https://github.com/CSIM-Toolkits/SlicerDiffusionComplexityMap/blob/main/LICENSE) file in the project repository.
+This project is under MIT license and following details are given at the [LICENSE](https://github.com/LOAMRI/Slicer-DTI-ALPS/blob/main/LICENSE) file in the project repository.
