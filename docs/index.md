@@ -106,6 +106,7 @@ We offer simple tutorials to guide you in using the Slicer DTI-ALPS Extension. S
         ✅ How to compute the DTI-ALPS index using the Slicer-DTI-ALPS extension. 
 
     - [Youtube](https://youtu.be/SWQreKeYTds) 
+
 - How to Calculate the DTI-ALPS Index Using the Slicer-DTI-ALPS Extension: Slicer DWI Sample
 
     - In this tutorial, we guide you step-by-step through using the Slicer-DTI-ALPS extension to calculate the DTI-ALPS index. This tool is designed for use with Slicer version 5.6 or above and provides an easy-to-use way to analyze diffusion tensor imaging (DTI) data.
@@ -117,7 +118,7 @@ We offer simple tutorials to guide you in using the Slicer DTI-ALPS Extension. S
         ✅ Creating ROI labels with the Slicer Segmentation tool.
 
         ✅ Generating DTI images from DWI data.
-        
+
         ✅ Calculating the DTI-ALPS index using the Slicer-DTI-ALPS extension.
         
     - [Youtube](https://youtu.be/wDsQ9REiads) 
