@@ -58,7 +58,7 @@ class DTI_ALPS(ScriptedLoadableModule):
         self.parent.dependencies = []
         self.parent.contributors = ["Antonio Carlos da Silva Senra Filho (State University of Campinas), André Monteiro Paschoal (State University of Campinas)"]
         self.parent.helpText = """
-This is a module that calculates the DTI-ALPS index from DTI images. More details are found at the <a href="https://www.slicer.org/wiki/Documentation/Nightly/Extensions/DTI_ALPS>wiki page</a>
+This is a module that calculates the DTI-ALPS index from DTI images. More details are found at the <a href=https://slicer-dti-alps.readthedocs.io/en/latest">documentation page</a>
 """
         # TODO: replace with organization, grant and thanks
         self.parent.acknowledgementText = """
