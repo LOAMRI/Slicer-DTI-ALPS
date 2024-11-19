@@ -1,13 +1,10 @@
 # Slicer Diffusion Tensor Image Analysis Along the Perivascular Space (DTI-ALPS)
 
-![project logo](https://raw.githubusercontent.com/LOAMRI/Slicer-DTI-ALPS/refs/heads/main/DTI_ALPS.png){ width="250" .center}
+![project logo](https://raw.githubusercontent.com/LOAMRI/Slicer-DTI-ALPS/refs/heads/main/DTI_ALPS.png){ width="200" .center}
 
 Welcome to the Slicer Diffusion Tensor Image Analysis Along the Perivascular Space (DTI-ALPS)!
 
 This 3D Slicer extension was designed to assist users in processing Diffusion Tensor Imaging (DTI) for the `DTI-ALPS` index calculation. 
-
-
-The full documentation of the usage, implementation and updates in the `DTI-ALPS` index is given in this repository and posted online using a [web-based host](https://slicer-dti-alps.readthedocs.io/en/latest/). 
 
 ## Output examples
 
@@ -49,7 +46,7 @@ For the GUI option, it only requires a DTI image (using the tensorial orientatio
 
 ### Using the CLI script
 
-If you want to execute the `DTI-ALPS` rapdly, it can be done by the Python script called: `runDTIALPS.py` that is installed with the `Slicer DTI-ALPS` extension. 
+If you want to execute the `DTI-ALPS` rapidly, it can be done by the Python script called: `runDTIALPS.py` that is installed with the `Slicer DTI-ALPS` extension. 
 
 !!! info inline end "Before execution the runDTIALPS script"
 
@@ -92,11 +89,44 @@ Windows:
 Slicer.exe --no-main-window --no-splash --python-script /path/to/module/runDTIALPS.py -h
 ```
 
+## Tutorials
+
+We offer simple tutorials to guide you in using the Slicer DTI-ALPS Extension. See the following tutorials below:
+
+- How to Calculate the DTI-ALPS Index Using the Slicer-DTI-ALPS Extension: Load DTI directly 
+
+    - In this tutorial, we guide you step-by-step through using the Slicer-DTI-ALPS extension to calculate the DTI-ALPS index. This tool is designed for use with Slicer version 5.6 or above and provides an easy-to-use way to analyze diffusion tensor imaging (DTI) data.
+
+        What you’ll learn in this tutorial:
+
+        ✅ How to convert FSL NIfTI data into a Slicer-compatible DWI volume.
+
+        ✅ How to generate DTI images from your DWI data.
+
+        ✅ How to compute the DTI-ALPS index using the Slicer-DTI-ALPS extension. 
+
+    - [Youtube](https://youtu.be/SWQreKeYTds) 
+- How to Calculate the DTI-ALPS Index Using the Slicer-DTI-ALPS Extension: Slicer DWI Sample
+
+    - In this tutorial, we guide you step-by-step through using the Slicer-DTI-ALPS extension to calculate the DTI-ALPS index. This tool is designed for use with Slicer version 5.6 or above and provides an easy-to-use way to analyze diffusion tensor imaging (DTI) data.
+
+        What you’ll learn in this tutorial:
+
+        ✅ Using Slicer image samples to select a DWI volume.
+
+        ✅ Creating ROI labels with the Slicer Segmentation tool.
+
+        ✅ Generating DTI images from DWI data.
+        
+        ✅ Calculating the DTI-ALPS index using the Slicer-DTI-ALPS extension.
+        
+    - [Youtube](https://youtu.be/wDsQ9REiads) 
+
 ## Cite this tool
 
 We hope that the `DTI-ALPS` can be helpful for your applications. If possible, recall to cite at least one of the following publications:
 
-* Senra Filho, A. C. da S.; Paschoal, A. M. "DTI-ALPS index as complementary information for Neuromyelitis Optica patients: a preliminary evaluation". ISMR & ISMRT Annual Meeting (2025)
+* Senra Filho, A. C. da S.; Paschoal, A. M. "DTI-ALPS index as complementary information for Neuromyelitis Optica patients: a preliminary evaluation". ISMRM & ISMRT Annual Meeting (2025)
 
 ## License
 
