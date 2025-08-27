@@ -127,7 +127,7 @@ We offer simple tutorials to guide you in using the Slicer DTI-ALPS Extension. S
 
 We hope that the `DTI-ALPS` can be helpful for your applications. If possible, recall to cite at least one of the following publications:
 
-* Senra Filho, A. C. da S.; Paschoal, A. M. "DTI-ALPS index as complementary information for Neuromyelitis Optica patients: a preliminary evaluation". ISMRM & ISMRT Annual Meeting (2025)
+* Senra Filho, A. C. da S.; Paschoal, A. M. "DTI-ALPS index as complementary information for Neuromyelitis Optica patients: a preliminary evaluation". ISMRM & ISMRT Annual Meeting (2025). [Link](https://www.researchgate.net/publication/395005016_DTI-ALPS_index_as_complementary_information_for_Neuromyelitis_Optica_patients_a_preliminary_evaluation)
 
 ## License
 
